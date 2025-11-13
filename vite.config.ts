@@ -3,10 +3,40 @@ import tailwindcss from "@tailwindcss/vite";
 import react from "@vitejs/plugin-react";
 import fs from "node:fs";
 import path from "path";
-import { defineConfig } from "vite";
+import { defineConfig, Plugin } from "vite";
 import { vitePluginManusRuntime } from "vite-plugin-manus-runtime";
 
-const plugins = [react(), tailwindcss(), jsxLocPlugin(), vitePluginManusRuntime()];
+// Plugin para garantir que o favicon seja copiado durante o build
+const faviconPlugin = (): Plugin => {
+  return {
+    name: "favicon-plugin",
+    buildStart() {
+      const clientRoot = path.resolve(import.meta.dirname, "client");
+      const faviconSource = path.join(clientRoot, "favicon.png");
+      const faviconDest = path.join(clientRoot, "public", "favicon.png");
+      
+      // Copia o favicon da raiz para public se existir
+      if (fs.existsSync(faviconSource) && !fs.existsSync(faviconDest)) {
+        fs.copyFileSync(faviconSource, faviconDest);
+      }
+    },
+    generateBundle() {
+      // Garante que o favicon seja incluído no build
+      const clientRoot = path.resolve(import.meta.dirname, "client");
+      const faviconPath = path.join(clientRoot, "public", "favicon.png");
+      
+      if (fs.existsSync(faviconPath)) {
+        this.emitFile({
+          type: "asset",
+          fileName: "favicon.png",
+          source: fs.readFileSync(faviconPath),
+        });
+      }
+    },
+  };
+};
+
+const plugins = [react(), tailwindcss(), jsxLocPlugin(), vitePluginManusRuntime(), faviconPlugin()];
 
 export default defineConfig({
   plugins,
