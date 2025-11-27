@@ -3,6 +3,13 @@
   command = "npm run build:netlify"
   # Diretório de publicação (onde o Vite gera os arquivos)
   publish = "dist/public"
+  # Versão do Node.js (recomendada pelo projeto)
+  node_version = "20"
+
+# Configuração de branch para deploy automático
+[build.environment]
+  NODE_VERSION = "20"
+  NPM_FLAGS = "--legacy-peer-deps"
 
 # Configurações para SPA (Single Page Application)
 # Redireciona todas as rotas para index.html para funcionar com roteamento client-side
